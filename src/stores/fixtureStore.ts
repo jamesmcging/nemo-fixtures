@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { configuration } from "@/configuration";
 import type Fixture from "@/types/fixture";
 
 
@@ -26,7 +25,7 @@ export const useFixtureStore = defineStore({
   actions: {
     async fetchFixtures() {
       try {
-        fetch(`${configuration.dev.url}/fixtures`)
+        fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures`)
         .then(response => response.json())
         .then( (data: Fixture[]) => {
           // we add a new field called time, this is a copy of the date field but necessary because the way vue3-easy-data-table works

@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { configuration } from "@/configuration";
 import type User from "@/types/user";
 
 export const useAuthenticationStore = defineStore({
@@ -17,7 +16,7 @@ export const useAuthenticationStore = defineStore({
     actions: {
         async login(email: string, password: string): Promise<boolean> {
             this._isAuthenticated = false;
-            return await fetch(`${configuration.dev.url}/authentication/login`, {
+            return await fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/authentication/login`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
@@ -42,7 +41,7 @@ export const useAuthenticationStore = defineStore({
         },
         async addUser(name: string, email: string, password: string): Promise<User | boolean> {
             console.log('adduser called');
-            return await fetch(`${configuration.dev.url}/authentication/user`, {
+            return await fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/authentication/user`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"

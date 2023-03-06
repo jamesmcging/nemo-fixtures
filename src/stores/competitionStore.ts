@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { configuration } from "@/configuration";
 import type Competition from "@/types/competition";
 
 export const useCompetitionStore = defineStore({
@@ -16,7 +15,7 @@ export const useCompetitionStore = defineStore({
   },
   actions: {
     async fetchCompetitions() {
-      fetch(`${configuration.dev.url}/competition`)
+      fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/competition`)
       .then( response => response.json() )
       .then( data => {
         this.competitions = data;
@@ -26,14 +25,14 @@ export const useCompetitionStore = defineStore({
       })
     },
     async updateCompetition(competitionId: number) {
-      return fetch(`${configuration.dev.url}/fixtures/updateFixtures/${competitionId}`)
+      return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixtures/${competitionId}`)
       .then(response => response.text())
       .catch(error => {
         console.error(error);
       })
     },
     async addCompetition(competitionId: number) {
-      return fetch(`${configuration.dev.url}/fixtures/fetchAndPopulateByCompetitionId/${competitionId}`)
+      return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/fetchAndPopulateByCompetitionId/${competitionId}`)
       .then(response => response.text())
       .catch(error => {
         console.log('competitionStore addCompetition in error catch')
