@@ -31,11 +31,25 @@ export const useCompetitionStore = defineStore({
         console.error(error);
       })
     },
-    async addCompetition(competitionId: number) {
+    async addCompetitionById(competitionId: number) {
       return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/fetchAndPopulateByCompetitionId/${competitionId}`)
       .then(response => response.text())
       .catch(error => {
         console.log('competitionStore addCompetition in error catch')
+        console.error(error);
+      })
+    },
+    async addCompetitionByName(competitionName: string) {
+      return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/competition/${competitionName}`, {
+        method: 'POST'
+      })
+      .then( response => response.json() )
+      .then( updatedCompetitionList => {
+        console.log('updatedCompetitionList', updatedCompetitionList);
+        this.competitions = updatedCompetitionList;
+      })
+      .catch(error => {
+        console.log('addCompetitionByName throws error')
         console.error(error);
       })
     }

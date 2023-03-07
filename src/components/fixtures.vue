@@ -11,7 +11,6 @@ import XLSX from "xlsx";
   const toast = useToast();
   const fixtureStore = useFixtureStore();
   const { currentFixtures: currentFixtures, competitionNames } = storeToRefs(fixtureStore);
-  // const excel_download_url = import.meta.env.VITE_FIXTURE_SERVICE_URL + '/fixtures/excel';
 
   onMounted(() => {
     fixtureStore.fetchFixtures();
@@ -29,15 +28,6 @@ import XLSX from "xlsx";
     { text: "Permission send to board", value: "permission_sought"},
     { text: "Score", value: "score"},
   ];
-  
-  // const getFormatedDate = (epoch: number) => {
-  //   const date = new Date(epoch * 1000);
-  //   let ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
-  //   let mo = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date);
-  //   let da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
-
-  //   return `${da}/${mo}/${ye}`;
-  // }
 
   const getFormatedTime = (epoch: number) => {
     const date = new Date(epoch * 1000);
@@ -105,7 +95,7 @@ import XLSX from "xlsx";
         <option value="all">All competitions</option>
         <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
       </select>
-      <button @click="getExcel()">Download excel</button>
+      <button class="btn" @click="getExcel()">Download excel</button>
     </div>
     <EasyDataTable
       :headers="headers"
