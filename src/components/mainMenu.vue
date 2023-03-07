@@ -8,9 +8,8 @@
       <h1>{{ props.title }}</h1>
   </div>
   <div id="main-menu-bottom">
-      <RouterLink to="/">Home</RouterLink> |
-      <RouterLink to="/competitions">Competitions</RouterLink> |
-      <RouterLink to="/fixtures">Fixtures</RouterLink>
+      <RouterLink to="/fixtures">Fixtures</RouterLink> |
+      <RouterLink to="/competitions">Competitions</RouterLink>
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import mainMenu from "./mainMenu.vue";
-const url = `${import.meta.env.VUE_APP_FIXTURE_SERVICE_URL}/fixtures/excel`;
+const url = `${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/excel`;
 </script>
 
 <template>

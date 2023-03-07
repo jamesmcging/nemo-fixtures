@@ -6,6 +6,16 @@ const router = createRouter({
   routes: [
     {
       path: "/",
+      name: "fixtures",
+      component: () => import("../components/fixtures.vue"),
+    },
+    {
+      path: "/fixtures",
+      name: "fixtures",
+      component: () => import("../components/fixtures.vue"),
+    },
+    {
+      path: "/home",
       name: "home",
       component: home,
     },
@@ -13,11 +23,6 @@ const router = createRouter({
       path: "/competitions",
       name: "competitions",
       component: () => import("../components/competitions.vue"),
-    },
-    {
-      path: "/fixtures",
-      name: "fixtures",
-      component: () => import("../components/fixtures.vue"),
     },
     {
       path: "/login",

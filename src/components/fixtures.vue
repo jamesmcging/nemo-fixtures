@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import MainMenu from './mainMenu.vue';
+import type Fixture from '../types/fixture';
 import { onMounted } from "vue";
 import { useFixtureStore } from '@/stores/fixtureStore';
 import type { Header } from "vue3-easy-data-table";
+import { useToast } from "vue-toastification";
 import { storeToRefs } from 'pinia';
 import { utils } from "xlsx";
 import XLSX from "xlsx";
-  
+  const toast = useToast();
   const fixtureStore = useFixtureStore();
   const { currentFixtures: currentFixtures, competitionNames } = storeToRefs(fixtureStore);
+  // const excel_download_url = import.meta.env.VITE_FIXTURE_SERVICE_URL + '/fixtures/excel';
 
   onMounted(() => {
     fixtureStore.fetchFixtures();
@@ -27,14 +30,14 @@ import XLSX from "xlsx";
     { text: "Score", value: "score"},
   ];
   
-  const getFormatedDate = (epoch: number) => {
-    const date = new Date(epoch * 1000);
-    let ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
-    let mo = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date);
-    let da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
+  // const getFormatedDate = (epoch: number) => {
+  //   const date = new Date(epoch * 1000);
+  //   let ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+  //   let mo = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date);
+  //   let da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
 
-    return `${da}/${mo}/${ye}`;
-  }
+  //   return `${da}/${mo}/${ye}`;
+  // }
 
   const getFormatedTime = (epoch: number) => {
     const date = new Date(epoch * 1000);
@@ -46,12 +49,49 @@ import XLSX from "xlsx";
   }
 
   const getExcel = () => {
-    
+    toast('Generating excel, this will appear in your downloads folder');
+    const data = currentFixtures.value.map((fixture: Fixture) => {
+      return {
+        date: getFormatedDate(Number(fixture.date)),
+        time: new Date(Number(fixture.date)*1000).toLocaleTimeString(),
+        competition: fixture.competition.name,
+        homeTeam: fixture.homeTeam,
+        awayTeam: fixture.awayTeam,
+        venue: fixture.venue,
+        pitch: fixture.pitch,
+        referee: fixture.referee_name,
+        permission_sought: fixture.permission_sought,
+        score: getFormatedScore(fixture.homeScore, fixture.awayScore)
+      }
+    });
     const workbook = utils.book_new();
-    const sheet = utils.json_to_sheet( currentFixtures.value );
+    const sheet = utils.json_to_sheet( data );
     utils.book_append_sheet(workbook, sheet);
 
-    XLSX.writeFileXLSX(workbook, 'test2.xlsx');
+    XLSX.writeFileXLSX(workbook, getFileName());
+  }
+
+  const getFormatedScore = (homeScore: string, awayScore: string) => {
+    return (homeScore && awayScore) ?  `${homeScore} : ${awayScore}` : '';
+  }
+
+  const getFormatedDate = (epoch: number) => {
+    const date = new Date(epoch * 1000);
+    let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+    let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
+    let day = new Intl.DateTimeFormat('en', { day: 'numeric' }).format(date);
+    let dayName = new Intl.DateTimeFormat('en', { weekday: 'short' }).format(date);
+
+    return `${dayName} ${month} ${day}`;
+  }
+
+  const getFileName = () => {
+    const date = new Date();
+    let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+    let monthAsNumber = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date);
+    let dayOfMonth = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
+    
+    return `nemo-fixtures-${year}-${monthAsNumber}-${dayOfMonth}.xlsx`;
   }
 
   

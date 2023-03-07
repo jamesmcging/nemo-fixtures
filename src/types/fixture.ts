@@ -9,7 +9,7 @@ export default interface Fixture {
     pitch: string,
     date: string,
     homeScore: string,
-    awayScrore: string,
+    awayScore: string,
     referee_name: string,
     permission_sought: boolean,
     permission_obtained: boolean,
