@@ -4,6 +4,7 @@
   import { onMounted } from "vue";
   import mainMenu from "./mainMenu.vue"
   import type { Header } from "vue3-easy-data-table";
+  import type Competition from "@/types/competition";
   import { useToast } from "vue-toastification";
   const toast = useToast();
 
@@ -58,6 +59,12 @@
     }
   }
 
+  function updateAllCompetitions() {
+    competitions.value.forEach( (competition: Competition) => {
+      updateCompetition(Number(competition.id))
+    });
+  }
+
   const headers: Header[] = [
     { text: "Id", value: "id"},
     { text: "Name", value: "name", sortable: true},
@@ -74,6 +81,7 @@
         Add new competion
         <input id="new-competition-id" type="number" placeholder="competition ID" @keyup.enter="addCompetition($event)"/>
       </label>
+      <button @click="updateAllCompetitions">Update all competitions</button>
     </div>
     <EasyDataTable
       :headers="headers"
@@ -91,6 +99,8 @@
   margin-top: 1rem;
 }
 #competition-actions {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 1rem;
 }
 </style>

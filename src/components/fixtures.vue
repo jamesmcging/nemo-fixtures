@@ -99,11 +99,14 @@ import XLSX from "xlsx";
 
 <template>
   <main-menu title="Fixtures"></main-menu>
-  <select name="filterFixturesByCompetitionName" @change="fixtureStore.filterFixturesByCompetitionName($event)">
-    <option value="all">All competitions</option>
-    <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
-  </select>
   <div id="content">
+    <div class="fixture-actions">  
+      <select name="filterFixturesByCompetitionName" @change="fixtureStore.filterFixturesByCompetitionName($event)">
+        <option value="all">All competitions</option>
+        <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
+      </select>
+      <button @click="getExcel()">Download excel</button>
+    </div>
     <EasyDataTable
       :headers="headers"
       :items="currentFixtures"
@@ -131,7 +134,6 @@ import XLSX from "xlsx";
       </template>
     </EasyDataTable>
   </div>
-  <button @click="getExcel()">Download excel</button>
 </template>
 
 <style scoped>
@@ -140,5 +142,10 @@ import XLSX from "xlsx";
 }
 .bold {
   font-weight: bold;
+}
+.fixture-actions{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 </style>
