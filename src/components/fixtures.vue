@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import MainMenu from './mainMenu.vue';
 import type Fixture from '../types/fixture';
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useFixtureStore } from '@/stores/fixtureStore';
 import type { Header } from "vue3-easy-data-table";
 import { useToast } from "vue-toastification";
 import { storeToRefs } from 'pinia';
 import { utils } from "xlsx";
 import XLSX from "xlsx";
+
   const toast = useToast();
   const fixtureStore = useFixtureStore();
-  const { currentFixtures: currentFixtures, competitionNames } = storeToRefs(fixtureStore);
+  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString } = storeToRefs(fixtureStore);
 
   onMounted(() => {
     fixtureStore.fetchFixtures();
+    fixtureStore.setDate(new Date(), 'fromDate');
+    const date = new Date();
+    fixtureStore.setDate(new Date(date.setDate(date.getDate() + 8)), 'toDate');
   })
 
   const headers: Header[] = [
@@ -25,7 +29,7 @@ import XLSX from "xlsx";
     { text: "Venue", value: "venue"},
     { text: "Pitch", value: "pitch"},
     { text: "Referee", value: "referee_name"},
-    { text: "Permission send to board", value: "permission_sought"},
+    { text: "Permission sought from board", value: "permission_sought"},
     { text: "Score", value: "score"},
   ];
 
@@ -83,19 +87,26 @@ import XLSX from "xlsx";
     
     return `nemo-fixtures-${year}-${monthAsNumber}-${dayOfMonth}.xlsx`;
   }
-
-  
+  const setFixtureStoreDateFilter = ($event: Event, dateFilterName: string) => {
+    const date = new Date(($event.target as HTMLInputElement).value);
+    fixtureStore.setDate(date, dateFilterName);
+  }
+  const setFixtureStoreCompetitionFilter = ($event: Event) => {
+    fixtureStore.setCompetitionFilter(($event.target as HTMLInputElement).value);
+  }
 </script>
 
 <template>
   <main-menu title="Fixtures"></main-menu>
   <div id="content">
     <div class="fixture-actions">  
-      <select name="filterFixturesByCompetitionName" @change="fixtureStore.filterFixturesByCompetitionName($event)">
+      <select name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)">
         <option value="all">All competitions</option>
         <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
       </select>
-      <button class="btn" @click="getExcel()">Download excel</button>
+      <input type="date" v-model="fromDateAsString" @change="setFixtureStoreDateFilter($event, 'fromDate')">
+      <input type="date" v-model="toDateAsString" @change="setFixtureStoreDateFilter($event, 'toDate')">
+      <button class="btn btn-outline-primary" @click="getExcel()">Download excel</button>
     </div>
     <EasyDataTable
       :headers="headers"

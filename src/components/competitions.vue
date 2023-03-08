@@ -92,11 +92,11 @@
     <div id="competition-actions">
       <div class="input-group">
         <input type="text" class="form-control" placeholder="Add competition by ID" @keyup.enter="addCompetitionById($event)">
-        <button class="btn btn-outline-secondary" @click="addCompetitionById($event)" type="button" id="button-addon2">Add</button>
+        <button class="btn btn-primary" @click="addCompetitionById($event)" type="button" id="button-addon2">Add</button>
       </div>
       <div class="btn-group">
-        <button class="btn btn-secondary" @click="toggleEventCreationWindow">Create Competition</button>
-        <button class="btn btn-primary" @click="updateAllCompetitions">Update all competitions</button>
+        <button class="btn btn-outline-secondary" @click="toggleEventCreationWindow">Create Competition</button>
+        <button class="btn btn-outline-secondary" @click="updateAllCompetitions">Update all competitions</button>
       </div>
     </div>
     <div v-if="showCreateEvent" class="create-event-window">
@@ -104,6 +104,7 @@
       <div class="input-group">
         <input type="text" v-model="newEventName" class="form-control" placeholder="Competition or event name" @keyup.enter="addCompetitionByName">
         <button class="btn btn-outline-secondary" @click="addCompetitionByName" type="button">Create</button>
+        <button class="btn btn-outline-secondary" @click="showCreateEvent=false" type="button">Cancel</button>
       </div>
     </div>
     <EasyDataTable
@@ -111,7 +112,7 @@
       :items="competitions"
       alternating>
       <template #item-createdAt="item">
-        <button class="btn btn-secondary btn-sm" @click=" updateCompetition(item.id)">Update</button>
+        <button class="btn btn-outline-secondary btn-sm" @click=" updateCompetition(item.id)">Update</button>
       </template>
     </EasyDataTable>
   </div>

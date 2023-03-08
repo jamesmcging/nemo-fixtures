@@ -8,7 +8,12 @@ export const useFixtureStore = defineStore({
     return {
       fixtures: [] as Fixture[],
       currentFixtures: [] as Fixture[],
-      competitionNames: new Set<string>()
+      competitionNames: new Set<string>(),
+      fromDateAsString: '',
+      fromDate: new Date(),
+      toDateAsString: '',
+      toDate: new Date(new Date().setDate(new Date().getDate() + 8)),
+      competitionFilterName: 'all'
     }
   },
   getters: {
@@ -20,6 +25,15 @@ export const useFixtureStore = defineStore({
     },
     getCompetitionName(state) {
       return state.competitionNames
+    },
+    getFromDate(state) {
+      return state.fromDateAsString
+    },
+    getToDate(state) {
+      return state.toDateAsString
+    },
+    getCompetitionFilterName(state) {
+      return state.competitionFilterName
     }
   },
   actions: {
@@ -35,28 +49,52 @@ export const useFixtureStore = defineStore({
 
           this.fixtures = data;
 
-          this.filterFixturesByNemo();
-
           this.fixtures.forEach(fixture => {
             this.competitionNames.add(fixture.competition.name);
           })
+
+          this.runFilters();
         })
       } catch (error) {
         console.log(error)
       }
     },
-    filterFixturesByCompetitionName($event: Event) {
-      const competitionName = ($event.target as HTMLInputElement).value;
-      this.currentFixtures = this.fixtures;
-      this.filterFixturesByNemo();
-      if (competitionName !== 'all') {
-        this.currentFixtures = this.currentFixtures.filter(fixture => fixture.competition.name === competitionName);
+    filterFixturesByCompetitionName(fixtures: Fixture[]) {
+      if (this.competitionFilterName === 'all') {
+        return fixtures;
+      } else {
+        return fixtures.filter(fixture => fixture.competition.name === this.competitionFilterName);
       }
     },
-    filterFixturesByNemo() {
-      this.currentFixtures = this.fixtures.filter(fixture => {
+    filterFixturesByNemo(fixtures: Fixture[]) {
+      return fixtures.filter(fixture => {
         return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers'))
       })
+    },
+    filterFixturesByDate(fixtures: Fixture[]) {
+      const filteredFixtures = fixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime() > this.fromDate.getTime()));
+      return filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime()) < this.toDate.getTime()); 
+    },
+    setCompetitionFilter(competitionName: string) {
+      this.competitionFilterName = competitionName;
+      this.runFilters();
+    },
+    setDate(date: Date, dateFilterName: string) {
+      if (dateFilterName === 'fromDate') {
+        this.fromDate = date;
+        this.fromDateAsString = date.toISOString().slice(0,10);
+      } else {
+        this.toDate = date;
+        this.toDateAsString = date.toISOString().slice(0,10);
+      }
+      this.runFilters();
+    },
+    runFilters() {
+      let fixtures = this.filterFixturesByNemo(this.fixtures);
+      fixtures = this.filterFixturesByCompetitionName(fixtures);
+      fixtures = this.filterFixturesByDate(fixtures);
+
+      this.currentFixtures = fixtures;
     }
   }
 });

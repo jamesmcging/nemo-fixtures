@@ -45,7 +45,6 @@ export const useCompetitionStore = defineStore({
       })
       .then( response => response.json() )
       .then( updatedCompetitionList => {
-        console.log('updatedCompetitionList', updatedCompetitionList);
         this.competitions = updatedCompetitionList;
       })
       .catch(error => {
