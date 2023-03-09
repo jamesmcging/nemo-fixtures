@@ -20,6 +20,7 @@ const toastOptions: PluginOptions = {
 };
 
 const app = createApp(App);
+
 app.use(Toast, toastOptions);
 app.component('EasyDataTable', Vue3EasyDataTable);
 app.use(createPinia());

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainMenu from './mainMenu.vue';
 import type Fixture from '../types/fixture';
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useFixtureStore } from '@/stores/fixtureStore';
 import type { Header } from "vue3-easy-data-table";
 import { useToast } from "vue-toastification";
@@ -12,6 +12,13 @@ import XLSX from "xlsx";
   const toast = useToast();
   const fixtureStore = useFixtureStore();
   const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade } = storeToRefs(fixtureStore);
+  let showCreatefixture = ref(false);
+  const showSetScore = ref(false);
+  const homeScore = ref('');
+  const homeTeam = ref('');
+  const awayScore = ref('');
+  const awayTeam = ref('');
+  const currentFixtureId = ref(0);
 
   onMounted(() => {
     fixtureStore.fetchFixtures();
@@ -29,7 +36,8 @@ import XLSX from "xlsx";
     { text: "Venue", value: "venue"},
     { text: "Pitch", value: "pitch"},
     { text: "Referee", value: "referee_name"},
-    { text: "Permission sought from board", value: "permission_sought"},
+    { text: "Permission sought", value: "permission_sought"},
+    { text: "Permission obtained", value: "permission_obtained"},
     { text: "Score", value: "score"},
   ];
 
@@ -120,6 +128,41 @@ import XLSX from "xlsx";
       toast.success('Updated commment on fixture');
     });
   }
+
+  const handlePermissionChange = ($event: Event, fixtureId: number, permissionStage: string) => {
+    const permission = !!($event.target as HTMLInputElement).value;
+    fixtureStore.setPermission(fixtureId, permission, permissionStage).then( () => {
+      toast.success(`Updated ${permissionStage} on fixture`);
+    });
+  }
+
+  const toggleCreateFixtureWindow = () => {
+    console.log('toggleCreateFixtureWindow called', showCreatefixture.value);
+    
+    showCreatefixture.value = !showCreatefixture.value;
+  }
+
+  const handleScore = (fixture: Fixture) => {
+    homeTeam.value = fixture.homeTeam;
+    homeScore.value = fixture.homeScore;
+    awayTeam.value = fixture.awayTeam;
+    awayScore.value = fixture.awayScore;
+    currentFixtureId.value = fixture.id;
+    showSetScore.value = true;
+  }
+
+  const saveScore = () => {
+    fixtureStore.setScore(homeScore.value, awayScore.value, currentFixtureId.value)
+    .then( () => {
+      toast.success('Set the score');
+      showSetScore.value = false;
+    })
+    .catch( err => {
+      toast.error('Unable to set the score');
+      showSetScore.value = false;
+    })
+  }
+
 </script>
 
 <template>
@@ -146,7 +189,35 @@ import XLSX from "xlsx";
       </div>
       </div>
       <div class="col">
-        <button class="float-end btn btn-outline-primary" @click="getExcel()">Download excel</button>
+        <div class="btn-group float-end">
+          <button class="btn btn-outline-secondary" @click="toggleCreateFixtureWindow()">New</button>
+          <button class="btn btn-outline-secondary" @click="getExcel()">Download</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showCreatefixture" class="row justify-content-evenly">
+      <div class="fixture-modal">
+        <p>Something</p>
+      </div>
+    </div>
+
+    <div v-if="showSetScore">
+      <div class="fixture-modal">
+        <div class="form-floating mb-2">
+          <input type="text" class="form-control" id="home-score-input" placeholder="Home team score eg 4-12" v-model="homeScore" autofocus>
+          <label for="home-score-input">{{ homeTeam }} score</label>
+        </div>
+        <div class="form-floating mb-1">
+          <input type="text" class="form-control" id="away-score-input" placeholder="Away team score" v-model="awayScore">
+          <label for="away-score-input">{{ awayTeam }} score</label>
+        </div>
+        <div class="d-flex justify-content-center p-2">
+          <div class="btn-group">
+            <button class="btn btn-primary" @click="saveScore()">Save</button>
+            <button class="btn btn-warning" @click="showSetScore=false">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -184,22 +255,36 @@ import XLSX from "xlsx";
           <option :value="6">Not applicable</option>
         </select>
       </template>
+      <template #item-permission_sought="item">
+        <input type="checkbox" v-model="item.permission_sought" @click="handlePermissionChange($event, item.id, 'permission_sought')">
+      </template>
+      <template #item-permission_obtained="item">
+        <input type="checkbox" v-model="item.permission_obtained" @click="handlePermissionChange($event, item.id, 'permission_obtained')">
+      </template>
       <template #item-score="item">
-        {{ item.homeScore }} : {{ item.awayScore }}
+        <span @click="handleScore(item)">{{ item.homeScore }} : {{ item.awayScore }}</span>
       </template>
       <template #expand="item">
-          <input type="text" class="form-control comment-input" placeholder="Comment on the fixture" @keyup.enter="handleFixtureComment($event, item.id)" :value="item.comment">
+        <input type="text" class="form-control comment-input" placeholder="Comment on the fixture" @keyup.enter="handleFixtureComment($event, item.id)" :value="item.comment">
       </template>
     </EasyDataTable>
   </div>
 </template>
 
 <style lang="scss" scoped>
+@import "bootstrap-icons/font/bootstrap-icons.css";
 #content {
   margin-top: 1rem;
   .fixture-actions{
     margin-bottom: 1rem;
   }
+
+  .fixture-modal {
+    background-color:beige;
+    min-height: 5rem;
+    padding: 1rem 15rem 1rem 15rem;
+  }
+
   .comment-input{
     margin: 0;
     border: none;
@@ -208,5 +293,4 @@ import XLSX from "xlsx";
 .bold {
   font-weight: bold;
 }
-
 </style>
