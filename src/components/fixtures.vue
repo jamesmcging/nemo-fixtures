@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainMenu from './mainMenu.vue';
 import type Fixture from '../types/fixture';
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
 import { useFixtureStore } from '@/stores/fixtureStore';
 import type { Header } from "vue3-easy-data-table";
 import { useToast } from "vue-toastification";
@@ -108,6 +108,11 @@ import XLSX from "xlsx";
       return 'btn btn-outline-secondary';
     }
   }
+
+  const handlePitchSelection = ($event: Event, fixtureId: number) => {
+    const pitch = ($event.target as HTMLInputElement).value;
+    fixtureStore.setPitch(fixtureId, pitch);
+  }
 </script>
 
 <template>
@@ -146,6 +151,9 @@ import XLSX from "xlsx";
       <template #item-date="item">
         {{ getFormatedDate(item.date) }}
       </template>
+      <template #item-time="item">
+        {{ getFormatedTime(item.time) }}
+      </template>
       <template #item-competition.name="item">
         <b v-show="item.competition.seniorGrade">Senior </b>{{ item.competition.name }}
       </template>
@@ -157,8 +165,17 @@ import XLSX from "xlsx";
         <template v-if="item.awayTeam.toLowerCase().includes('nemo rangers')"><span class="bold">{{ item.awayTeam }}</span></template>
         <template v-else>{{ item.awayTeam }}</template>
       </template>
-      <template #item-time="item">
-        {{ getFormatedTime(item.time) }}
+      <template #item-pitch="item">
+        <select class="input-control" v-model="item.pitch" @change="handlePitchSelection($event, item.id)">
+          <option disabled value="">Select pitch</option>
+          <option :value="0">TBC</option>
+          <option :value="1">Pitch 1</option>
+          <option :value="2">Pitch 2</option>
+          <option :value="3">Pitch 3</option>
+          <option :value="4">Pitch 4</option>
+          <option :value="5">Away</option>
+          <option :value="6">Not applicable</option>
+        </select>
       </template>
       <template #item-score="item">
         {{ item.homeScore }} : {{ item.awayScore }}

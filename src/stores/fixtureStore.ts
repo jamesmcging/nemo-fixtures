@@ -128,11 +128,26 @@ export const useFixtureStore = defineStore({
     runFilters() {
       let fixtures = this.filterFixturesByNemo(this.fixtures);
       fixtures = this.filterFixturesByCompetitionName(fixtures);
-      // fixtures = this.filterFixturesByDate(fixtures);
+      fixtures = this.filterFixturesByDate(fixtures);
       fixtures = this.filterFixturesBySeniorGrade(fixtures);
       fixtures = this.filterFixturesByUnderageGrade(fixtures);
 
       this.currentFixtures = fixtures;
+    },
+    async setPitch(fixtureId: number, pitchNumber: string) {
+      try {
+        fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixture/${fixtureId}/pitch/${pitchNumber}`)
+        .then(response => response.json())
+        .then( (updatedFixture: Fixture) => {
+          const fixtureToReplace = this.fixtures.find((fixture: Fixture) => updatedFixture.id === fixture.id);
+          if (fixtureToReplace) {
+            Object.assign(fixtureToReplace, updatedFixture);
+          }
+          this.runFilters();
+        })
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 });
