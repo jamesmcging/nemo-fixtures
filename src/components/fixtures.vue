@@ -113,6 +113,13 @@ import XLSX from "xlsx";
     const pitch = ($event.target as HTMLInputElement).value;
     fixtureStore.setPitch(fixtureId, pitch);
   }
+
+  const handleFixtureComment = ($event: Event, fixtureId: number) => {
+    const comment = ($event.target as HTMLInputElement).value;
+    fixtureStore.setComment(fixtureId, comment).then( () => {
+      toast.success('Updated commment on fixture');
+    });
+  }
 </script>
 
 <template>
@@ -181,7 +188,7 @@ import XLSX from "xlsx";
         {{ item.homeScore }} : {{ item.awayScore }}
       </template>
       <template #expand="item">
-        {{ item.comment }}
+          <input type="text" class="form-control comment-input" placeholder="Comment on the fixture" @keyup.enter="handleFixtureComment($event, item.id)" :value="item.comment">
       </template>
     </EasyDataTable>
   </div>
@@ -193,7 +200,10 @@ import XLSX from "xlsx";
   .fixture-actions{
     margin-bottom: 1rem;
   }
-
+  .comment-input{
+    margin: 0;
+    border: none;
+  }
 }
 .bold {
   font-weight: bold;

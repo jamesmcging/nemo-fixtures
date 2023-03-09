@@ -148,6 +148,21 @@ export const useFixtureStore = defineStore({
       } catch (error) {
         console.log(error)
       }
+    },
+    async setComment(fixtureId: number, comment: string) {
+      try {
+        return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixture/${fixtureId}/comment/${comment}`)
+        .then(response => response.json())
+        .then( (updatedFixture: Fixture) => {
+          const fixtureToReplace = this.fixtures.find((fixture: Fixture) => updatedFixture.id === fixture.id);
+          if (fixtureToReplace) {
+            Object.assign(fixtureToReplace, updatedFixture);
+          }
+          this.runFilters();
+        })
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 });
