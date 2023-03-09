@@ -12,8 +12,10 @@ export const useFixtureStore = defineStore({
       fromDateAsString: '',
       fromDate: new Date(),
       toDateAsString: '',
-      toDate: new Date(new Date().setDate(new Date().getDate() + 8)),
-      competitionFilterName: 'all'
+      toDate: new Date(new Date().setDate(new Date().getDate() + 14)),
+      competitionFilterName: 'all',
+      showSeniorGrade: false,
+      showUnderageGrade: true
     }
   },
   getters: {
@@ -34,6 +36,12 @@ export const useFixtureStore = defineStore({
     },
     getCompetitionFilterName(state) {
       return state.competitionFilterName
+    },
+    getShowSeniorGrade(state) {
+      return state.showSeniorGrade
+    },
+    getUnderageGrade(state) {
+      return state.showUnderageGrade
     }
   },
   actions: {
@@ -75,6 +83,26 @@ export const useFixtureStore = defineStore({
       const filteredFixtures = fixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime() > this.fromDate.getTime()));
       return filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime()) < this.toDate.getTime()); 
     },
+    filterFixturesBySeniorGrade(fixtures: Fixture[]) {
+      // exclude senior fixtures when toggled to hide them
+      return fixtures.filter(fixture => {
+        if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
+          return false
+        } else {
+          return true
+        }
+      })
+    },
+    filterFixturesByUnderageGrade(fixtures: Fixture[]) {
+      // exclude underage fixtures when tottle to hide them
+      return fixtures.filter(fixture => {
+        if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
+          return false
+        } else {
+          return true
+        }
+      })
+    },
     setCompetitionFilter(competitionName: string) {
       this.competitionFilterName = competitionName;
       this.runFilters();
@@ -89,10 +117,20 @@ export const useFixtureStore = defineStore({
       }
       this.runFilters();
     },
+    toggleShowGrade(grade: string) {
+      if (grade === 'seniorGrade') {
+        this.showSeniorGrade = !this.showSeniorGrade
+      } else {
+        this.showUnderageGrade = !this.showUnderageGrade
+      }
+      this.runFilters();
+    },
     runFilters() {
       let fixtures = this.filterFixturesByNemo(this.fixtures);
       fixtures = this.filterFixturesByCompetitionName(fixtures);
-      fixtures = this.filterFixturesByDate(fixtures);
+      // fixtures = this.filterFixturesByDate(fixtures);
+      fixtures = this.filterFixturesBySeniorGrade(fixtures);
+      fixtures = this.filterFixturesByUnderageGrade(fixtures);
 
       this.currentFixtures = fixtures;
     }

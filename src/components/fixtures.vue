@@ -11,13 +11,13 @@ import XLSX from "xlsx";
 
   const toast = useToast();
   const fixtureStore = useFixtureStore();
-  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString } = storeToRefs(fixtureStore);
+  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade } = storeToRefs(fixtureStore);
 
   onMounted(() => {
     fixtureStore.fetchFixtures();
     fixtureStore.setDate(new Date(), 'fromDate');
     const date = new Date();
-    fixtureStore.setDate(new Date(date.setDate(date.getDate() + 8)), 'toDate');
+    fixtureStore.setDate(new Date(date.setDate(date.getDate() + 14)), 'toDate');
   })
 
   const headers: Header[] = [
@@ -87,27 +87,57 @@ import XLSX from "xlsx";
     
     return `nemo-fixtures-${year}-${monthAsNumber}-${dayOfMonth}.xlsx`;
   }
+
   const setFixtureStoreDateFilter = ($event: Event, dateFilterName: string) => {
     const date = new Date(($event.target as HTMLInputElement).value);
     fixtureStore.setDate(date, dateFilterName);
   }
+  
   const setFixtureStoreCompetitionFilter = ($event: Event) => {
     fixtureStore.setCompetitionFilter(($event.target as HTMLInputElement).value);
+  }
+
+  const getGradeButtonClass = (grade: string) => {
+    if (grade === 'seniorGrade' && showSeniorGrade.value) {
+      return 'btn btn-secondary';
+    } else if (grade === 'seniorGrade' && !showSeniorGrade.value) {
+      return 'btn btn-outline-secondary';
+    } else if (grade === 'underageGrade' && showUnderageGrade.value) {
+      return 'btn btn-secondary';
+    } else if (grade === 'underageGrade' && !showUnderageGrade.value) {
+      return 'btn btn-outline-secondary';
+    }
   }
 </script>
 
 <template>
   <main-menu title="Fixtures"></main-menu>
-  <div id="content">
-    <div class="fixture-actions">  
-      <select name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)">
-        <option value="all">All competitions</option>
-        <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
-      </select>
-      <input type="date" v-model="fromDateAsString" @change="setFixtureStoreDateFilter($event, 'fromDate')">
-      <input type="date" v-model="toDateAsString" @change="setFixtureStoreDateFilter($event, 'toDate')">
-      <button class="btn btn-outline-primary" @click="getExcel()">Download excel</button>
+  <div id="content" class="container">
+    
+    <div class="row justify-content-between fixture-actions">
+      <div class="col">
+        <select class="form-select" name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)">
+          <option value="all">All competitions</option>
+          <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
+        </select>
+      </div>
+      <div class="col">
+        <input class="form-control" type="date" v-model="fromDateAsString" @change="setFixtureStoreDateFilter($event, 'fromDate')">
+      </div>
+      <div class="col">
+        <input class="form-control" type="date" v-model="toDateAsString" @change="setFixtureStoreDateFilter($event, 'toDate')">
+      </div>
+      <div class="col">
+        <div class="btn-group">
+        <button :class="getGradeButtonClass('seniorGrade')" @click="fixtureStore.toggleShowGrade('seniorGrade')">Senior</button>
+        <button :class="getGradeButtonClass('underageGrade')" @click="fixtureStore.toggleShowGrade('underage')">Underage</button>
+      </div>
+      </div>
+      <div class="col">
+        <button class="float-end btn btn-outline-primary" @click="getExcel()">Download excel</button>
+      </div>
     </div>
+
     <EasyDataTable
       :headers="headers"
       :items="currentFixtures"
@@ -115,6 +145,9 @@ import XLSX from "xlsx";
     >
       <template #item-date="item">
         {{ getFormatedDate(item.date) }}
+      </template>
+      <template #item-competition.name="item">
+        <b v-show="item.competition.seniorGrade">Senior </b>{{ item.competition.name }}
       </template>
       <template #item-homeTeam="item">
         <template v-if="item.homeTeam.toLowerCase().includes('nemo rangers')"><span class="bold">{{ item.homeTeam }}</span></template>
@@ -137,16 +170,16 @@ import XLSX from "xlsx";
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 #content {
   margin-top: 1rem;
+  .fixture-actions{
+    margin-bottom: 1rem;
+  }
+
 }
 .bold {
   font-weight: bold;
 }
-.fixture-actions{
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
+
 </style>

@@ -51,6 +51,19 @@ export const useCompetitionStore = defineStore({
         console.log('addCompetitionByName throws error')
         console.error(error);
       })
+    },
+    async toggleSeniorGrade(competitionId: number, seniorGrade: boolean) {
+      return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/competition/${competitionId}/seniorGrade/${seniorGrade}`, {
+        method: 'PATCH'
+      })
+      .then( response => response.json() )
+      .then( updatedCompetitionList => {
+        this.competitions = updatedCompetitionList;
+      })
+      .catch(error => {
+        console.log('toggleSeniorGrade throws error')
+        console.error(error);
+      })
     }
-  }
+  },
 });

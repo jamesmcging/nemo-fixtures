@@ -4,5 +4,6 @@ export default interface Competition {
     shortname: string,
     createdAt: string,
     updatedAt: string,
-    year: number
+    year: number,
+    seniorGrade: boolean
 }

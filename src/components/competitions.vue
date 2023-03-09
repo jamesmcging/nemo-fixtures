@@ -78,9 +78,15 @@
     showCreateEvent.value = !showCreateEvent.value
   }
 
+  function handleGradeChange($event: Event, competitionId: number) {
+    const seniorGrade = ($event.target as HTMLInputElement).checked;
+    competitionStore.toggleSeniorGrade(competitionId, seniorGrade);
+  }
+
   const headers: Header[] = [
     { text: "Id", value: "id"},
     { text: "Name", value: "name", sortable: true},
+    { text: "Senior Grade", value: "seniorGrade"},
     { text: "Last updated", value: "updatedAt"},
     { text: "Actions", value: "createdAt"}
   ];
@@ -111,6 +117,9 @@
       :headers="headers"
       :items="competitions"
       alternating>
+      <template #item-seniorGrade="item">
+        <input type="checkbox" v-model="item.seniorGrade" @click="handleGradeChange($event, item.id)">
+      </template>
       <template #item-createdAt="item">
         <button class="btn btn-outline-secondary btn-sm" @click=" updateCompetition(item.id)">Update</button>
       </template>
