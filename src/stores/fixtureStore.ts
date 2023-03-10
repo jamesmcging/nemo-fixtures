@@ -51,11 +51,9 @@ export const useFixtureStore = defineStore({
         .then(response => response.json())
         .then( (data: Fixture[]) => {
           // we add a new field called time, this is a copy of the date field but necessary because the way vue3-easy-data-table works
-          data = data.map(fixture => {
+          this.fixtures = data.map(fixture => {
             return {...fixture, time: fixture.date}
           });
-
-          this.fixtures = data;
 
           this.fixtures.forEach(fixture => {
             if (fixture?.competition?.name) {
@@ -87,7 +85,7 @@ export const useFixtureStore = defineStore({
     },
     filterFixturesBySeniorGrade(fixtures: Fixture[]) {
       // exclude senior fixtures when toggled to hide them
-      return fixtures.filter(fixture => {
+      return fixtures.filter( (fixture:Fixture) => {
         if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
           return false
         } else {
@@ -97,7 +95,7 @@ export const useFixtureStore = defineStore({
     },
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
       // exclude underage fixtures when tottle to hide them
-      return fixtures.filter(fixture => {
+      return fixtures.filter( (fixture:Fixture) => {
         if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
           return false
         } else {
@@ -132,7 +130,7 @@ export const useFixtureStore = defineStore({
       let fixtures = this.filterFixturesByNemo(this.fixtures);
       fixtures = this.filterFixturesByCompetitionName(fixtures);
       fixtures = this.filterFixturesByDate(fixtures);
-      fixtures = this.filterFixturesBySeniorGrade(fixtures);
+      // fixtures = this.filterFixturesBySeniorGrade(fixtures);
       fixtures = this.filterFixturesByUnderageGrade(fixtures);
 
       this.currentFixtures = fixtures;
