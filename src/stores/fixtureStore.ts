@@ -87,12 +87,10 @@ export const useFixtureStore = defineStore({
       // exclude senior fixtures when toggled to hide them
       if (fixtures.length) {
         return fixtures.filter( (fixture:Fixture) => {
-          console.log('filterFixturesBySeniorGrade', fixture.competition);
-          if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
-            return false
-          } else {
-            return true
+          if (fixture.competition === null) {
+            console.log('fixture', fixture);
           }
+          return (fixture.competition.seniorGrade && !this.showSeniorGrade) ? false : true;
         })
       } else {
         return fixtures;
@@ -101,19 +99,12 @@ export const useFixtureStore = defineStore({
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
       // exclude underage fixtures when tottle to hide them
       if (fixtures.length) {
-        return fixtures.filter( (fixture:Fixture) => {
-          if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
-            return false
-          } else {
-            return true
-          }
-        })
+        return fixtures.filter( (fixture:Fixture) => (!fixture.competition.seniorGrade && !this.showUnderageGrade) ? false : true)
       } else {
         return fixtures;
       }
     },
     setCompetitionFilter(competitionName: string) {
-      console.log(competitionName, this.competitionFilterName);
       this.competitionFilterName = competitionName;
       this.runFilters();
     },
@@ -137,12 +128,10 @@ export const useFixtureStore = defineStore({
     },
     runFilters() {
       let fixtures = this.filterFixturesByNemo(this.fixtures);
-      if (fixtures.length) {
-        fixtures = this.filterFixturesByCompetitionName(fixtures);
-        fixtures = this.filterFixturesByDate(fixtures);
-        fixtures = this.filterFixturesBySeniorGrade(fixtures);
-        fixtures = this.filterFixturesByUnderageGrade(fixtures);
-      }
+      fixtures = this.filterFixturesByCompetitionName(fixtures);
+      fixtures = this.filterFixturesByDate(fixtures);
+      fixtures = this.filterFixturesBySeniorGrade(fixtures);
+      fixtures = this.filterFixturesByUnderageGrade(fixtures);
       this.currentFixtures = fixtures;
     },
     async setPitch(fixtureId: number, pitchNumber: string) {
