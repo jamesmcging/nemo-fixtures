@@ -61,7 +61,7 @@ const handleLogin = ($event: Event) => {
     <!-- <main-menu title="Upcoming Nemo Fixtures" show-nav="true"></main-menu> -->
 
     <div class="container">
-        <div id="home-title" @click.ctlr="handleLogin($event)">
+        <div id="home-title" @dblclick.shift="handleLogin($event)">
             <img src="@/assets/nemo.png">
             <h1>Upcoming Nemo Fixtures</h1>
         </div>
