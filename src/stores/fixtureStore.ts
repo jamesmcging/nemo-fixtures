@@ -58,7 +58,9 @@ export const useFixtureStore = defineStore({
           this.fixtures = data;
 
           this.fixtures.forEach(fixture => {
-            this.competitionNames.add(fixture.competition.name);
+            if (fixture?.competition?.name) {
+              this.competitionNames.add(fixture.competition.name);
+            }
           })
 
           this.runFilters();
@@ -104,6 +106,7 @@ export const useFixtureStore = defineStore({
       })
     },
     setCompetitionFilter(competitionName: string) {
+      console.log(competitionName, this.competitionFilterName);
       this.competitionFilterName = competitionName;
       this.runFilters();
     },
@@ -189,6 +192,31 @@ export const useFixtureStore = defineStore({
             if (fixtureToReplace) {
               Object.assign(fixtureToReplace, updatedFixture);
             }
+            this.runFilters();
+          })
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async setNewFixture(competitionId: number, jsEpoch: number, homeTeam: string, awayTeam: string, venue: string): Promise<void> {
+      try {
+        const newFixture = {
+          homeTeam: homeTeam,
+          awayTeam: awayTeam,
+          venue: venue,
+          fixtureDate: jsEpoch ? Math.round(jsEpoch / 1000) : Math.round(new Date().getTime() / 1000),
+          competitionId: competitionId
+        }
+        return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newFixture)
+        })
+          .then(response => response.json())
+          .then( (updatedFixturesList: Fixture[]) => {
+            this.fixtures = updatedFixturesList;
             this.runFilters();
           })
       } catch (error) {

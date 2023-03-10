@@ -15,6 +15,9 @@ import "vue-toastification/dist/index.css";
 import './scss/styles.scss';
 import * as bootstrap from 'bootstrap'
 
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
+
 const toastOptions: PluginOptions = {
     position: POSITION.BOTTOM_RIGHT
 };
@@ -23,6 +26,7 @@ const app = createApp(App);
 
 app.use(Toast, toastOptions);
 app.component('EasyDataTable', Vue3EasyDataTable);
+app.component('VueDatePicker', VueDatePicker);
 app.use(createPinia());
 app.use(router);
 

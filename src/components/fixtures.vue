@@ -2,17 +2,20 @@
 import MainMenu from './mainMenu.vue';
 import type Fixture from '../types/fixture';
 import { onMounted, ref } from "vue";
-import { useFixtureStore } from '@/stores/fixtureStore';
 import type { Header } from "vue3-easy-data-table";
 import { useToast } from "vue-toastification";
 import { storeToRefs } from 'pinia';
 import { utils } from "xlsx";
 import XLSX from "xlsx";
+import { useFixtureStore } from '@/stores/fixtureStore';
+import { useCompetitionStore } from '@/stores/competitionStore';
 
   const toast = useToast();
   const fixtureStore = useFixtureStore();
-  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade } = storeToRefs(fixtureStore);
-  let showCreatefixture = ref(false);
+  const competitionStore = useCompetitionStore();
+  const { competitions } = storeToRefs(competitionStore);
+  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade, competitionFilterName } = storeToRefs(fixtureStore);
+  
   const showSetScore = ref(false);
   const homeScore = ref('');
   const homeTeam = ref('');
@@ -21,6 +24,7 @@ import XLSX from "xlsx";
   const currentFixtureId = ref(0);
 
   onMounted(() => {
+    competitionStore.fetchCompetitions();
     fixtureStore.fetchFixtures();
     fixtureStore.setDate(new Date(), 'fromDate');
     const date = new Date();
@@ -136,12 +140,6 @@ import XLSX from "xlsx";
     });
   }
 
-  const toggleCreateFixtureWindow = () => {
-    console.log('toggleCreateFixtureWindow called', showCreatefixture.value);
-    
-    showCreatefixture.value = !showCreatefixture.value;
-  }
-
   const handleScore = (fixture: Fixture) => {
     homeTeam.value = fixture.homeTeam;
     homeScore.value = fixture.homeScore;
@@ -162,18 +160,17 @@ import XLSX from "xlsx";
       showSetScore.value = false;
     })
   }
-
 </script>
 
 <template>
-  <main-menu title="Fixtures"></main-menu>
+  <main-menu title="Fixtures" show-nav="true"></main-menu>
   <div id="content" class="container">
     
     <div class="row justify-content-between fixture-actions">
       <div class="col">
-        <select class="form-select" name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)">
+        <select class="form-select" name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)" v-model="competitionFilterName">
           <option value="all">All competitions</option>
-          <option v-for="competitionName in competitionNames" :value="competitionName">{{ competitionName }}</option>
+          <option v-for="competition in competitions" :value="competition.name">{{ competition.name }}</option>
         </select>
       </div>
       <div class="col">
@@ -189,16 +186,7 @@ import XLSX from "xlsx";
       </div>
       </div>
       <div class="col">
-        <div class="btn-group float-end">
-          <button class="btn btn-outline-secondary" @click="toggleCreateFixtureWindow()">New</button>
-          <button class="btn btn-outline-secondary" @click="getExcel()">Download</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showCreatefixture" class="row justify-content-evenly">
-      <div class="fixture-modal">
-        <p>Something</p>
+        <button class="btn btn-outline-secondary" @click="getExcel()">Download</button>
       </div>
     </div>
 
@@ -288,6 +276,10 @@ import XLSX from "xlsx";
   .comment-input{
     margin: 0;
     border: none;
+  }
+
+  .new-fixture-button {
+    margin-top: 1rem;
   }
 }
 .bold {
