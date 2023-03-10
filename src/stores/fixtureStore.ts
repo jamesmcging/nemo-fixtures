@@ -87,7 +87,7 @@ export const useFixtureStore = defineStore({
       // exclude senior fixtures when toggled to hide them
       if (fixtures.length) {
         return fixtures.filter( (fixture:Fixture) => {
-          if (fixture.competition === null) {
+          if (!fixture.competition) {
             return true
           } else {
             return (fixture.competition.seniorGrade && !this.showSeniorGrade) ? false : true;
@@ -101,10 +101,10 @@ export const useFixtureStore = defineStore({
       // exclude underage fixtures when tottle to hide them
       if (fixtures.length) {
         return fixtures.filter( (fixture:Fixture) => {
-          if (fixture.competition === null) {
+          if (!fixture.competition) {
             return true
           } else {
-            (!fixture.competition.seniorGrade && !this.showUnderageGrade) ? false : true
+            return (!fixture.competition.seniorGrade && !this.showUnderageGrade) ? false : true
           }
         })
       } else {
