@@ -68,25 +68,33 @@ export const useFixtureStore = defineStore({
       }
     },
     filterFixturesByCompetitionName(fixtures: Fixture[]) {
+      let response = []
       if (this.competitionFilterName === 'all') {
-        return fixtures;
+        response = fixtures;
       } else {
-        return fixtures.filter(fixture => fixture.competition.name === this.competitionFilterName);
+        response = fixtures.filter(fixture => fixture.competition.name === this.competitionFilterName);
       }
+      console.log(`Fixture count after filterByCompetitionName ${response.length}`);
+      return response;
     },
     filterFixturesByNemo(fixtures: Fixture[]) {
-      return fixtures.filter(fixture => {
-        return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers'))
+      let response = fixtures.filter(fixture => {
+        return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers') || fixture.competition.name.toLowerCase().includes('event'))
       })
+      console.log(`Fixture count after filterFixturesByNemo ${response.length}`);
+      return response;
     },
     filterFixturesByDate(fixtures: Fixture[]) {
       const filteredFixtures = fixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime() > this.fromDate.getTime()));
-      return filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime()) < this.toDate.getTime()); 
+      let response = filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime()) < this.toDate.getTime()); 
+      console.log(`Fixture count after filterFixturesByDate ${response.length}`);
+      return response;
     },
     filterFixturesBySeniorGrade(fixtures: Fixture[]) {
+      let response = [];
       // exclude senior fixtures when toggled to hide them
       if (fixtures.length) {
-        return fixtures.filter( (fixture:Fixture) => {
+        response = fixtures.filter( (fixture:Fixture) => {
           if (!fixture.competition) {
             return true
           } else {
@@ -94,13 +102,16 @@ export const useFixtureStore = defineStore({
           }
         })
       } else {
-        return fixtures;
+        response = fixtures;
       }
+      console.log(`Fixture count after filterFixturesBySeniorGrade ${response.length}`);
+      return response;
     },
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
+      let response = [];
       // exclude underage fixtures when tottle to hide them
       if (fixtures.length) {
-        return fixtures.filter( (fixture:Fixture) => {
+        response = fixtures.filter( (fixture:Fixture) => {
           if (!fixture.competition) {
             return true
           } else {
@@ -108,8 +119,10 @@ export const useFixtureStore = defineStore({
           }
         })
       } else {
-        return fixtures;
+        response = fixtures;
       }
+      console.log(`Fixture count after filterFixturesByUnderageGrade ${response.length}`);
+      return response;
     },
     setCompetitionFilter(competitionName: string) {
       this.competitionFilterName = competitionName;
