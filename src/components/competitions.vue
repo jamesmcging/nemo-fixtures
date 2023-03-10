@@ -47,7 +47,7 @@ function addCompetitionById($event: Event) {
   if (competitionId > 100000) {
     toast(`Fetching fixtures for competition ${competitionId}`);
     competitionStore.addCompetitionById(competitionId)
-      .then(response => {
+      .then(() => {
         toast.success(`Added new competition with id ${competitionId}`);
       })
       .catch(error => {
