@@ -48,7 +48,7 @@ function addCompetitionById($event: Event) {
     toast(`Fetching fixtures for competition ${competitionId}`);
     competitionStore.addCompetitionById(competitionId)
       .then(response => {
-        toast.success(response || 'Default toasts message');
+        toast.success(`Added new competition with id ${competitionId}`);
       })
       .catch(error => {
         toast.clear();
