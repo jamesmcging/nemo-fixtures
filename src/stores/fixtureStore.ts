@@ -85,23 +85,32 @@ export const useFixtureStore = defineStore({
     },
     filterFixturesBySeniorGrade(fixtures: Fixture[]) {
       // exclude senior fixtures when toggled to hide them
-      return fixtures.filter( (fixture:Fixture) => {
-        if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
-          return false
-        } else {
-          return true
-        }
-      })
+      if (fixtures.length) {
+        return fixtures.filter( (fixture:Fixture) => {
+          console.log('filterFixturesBySeniorGrade', fixture.competition);
+          if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
+            return false
+          } else {
+            return true
+          }
+        })
+      } else {
+        return fixtures;
+      }
     },
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
       // exclude underage fixtures when tottle to hide them
-      return fixtures.filter( (fixture:Fixture) => {
-        if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
-          return false
-        } else {
-          return true
-        }
-      })
+      if (fixtures.length) {
+        return fixtures.filter( (fixture:Fixture) => {
+          if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
+            return false
+          } else {
+            return true
+          }
+        })
+      } else {
+        return fixtures;
+      }
     },
     setCompetitionFilter(competitionName: string) {
       console.log(competitionName, this.competitionFilterName);
