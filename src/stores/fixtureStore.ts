@@ -86,7 +86,7 @@ export const useFixtureStore = defineStore({
     filterFixturesBySeniorGrade(fixtures: Fixture[]) {
       // exclude senior fixtures when toggled to hide them
       return fixtures.filter( (fixture:Fixture) => {
-        if (fixture?.competition.seniorGrade && !this.showSeniorGrade) {
+        if (fixture.competition.seniorGrade && !this.showSeniorGrade) {
           return false
         } else {
           return true
@@ -96,7 +96,7 @@ export const useFixtureStore = defineStore({
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
       // exclude underage fixtures when tottle to hide them
       return fixtures.filter( (fixture:Fixture) => {
-        if (!fixture?.competition.seniorGrade && !this.showUnderageGrade) {
+        if (!fixture.competition.seniorGrade && !this.showUnderageGrade) {
           return false
         } else {
           return true
@@ -128,11 +128,12 @@ export const useFixtureStore = defineStore({
     },
     runFilters() {
       let fixtures = this.filterFixturesByNemo(this.fixtures);
-      fixtures = this.filterFixturesByCompetitionName(fixtures);
-      fixtures = this.filterFixturesByDate(fixtures);
-      fixtures = this.filterFixturesBySeniorGrade(fixtures);
-      fixtures = this.filterFixturesByUnderageGrade(fixtures);
-
+      if (fixtures.length) {
+        fixtures = this.filterFixturesByCompetitionName(fixtures);
+        fixtures = this.filterFixturesByDate(fixtures);
+        fixtures = this.filterFixturesBySeniorGrade(fixtures);
+        fixtures = this.filterFixturesByUnderageGrade(fixtures);
+      }
       this.currentFixtures = fixtures;
     },
     async setPitch(fixtureId: number, pitchNumber: string) {
