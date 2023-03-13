@@ -18,7 +18,9 @@ import { useCompetitionStore } from "@/stores/competitionStore";
 </script>
 
 <template>
-    <RouterView />
+    <div class="container">
+        <RouterView />
+    </div>
 </template>
 
 <style scoped>

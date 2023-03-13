@@ -130,7 +130,7 @@ const headers: Header[] = [
         <input type="checkbox" v-model="item.seniorGrade" @click="handleGradeChange($event, item.id)">
       </template>
       <template #item-createdAt="item">
-        <button class="btn btn-outline-secondary btn-sm" @click="updateCompetition(item.id)">Update</button>
+        <button class="btn btn-outline-secondary btn-sm" v-if="item.id > 1000" @click="updateCompetition(item.id)">Update</button>
       </template>
     </EasyDataTable>
   </div>

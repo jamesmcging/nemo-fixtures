@@ -239,6 +239,36 @@ export const useFixtureStore = defineStore({
       } catch (error) {
         console.log(error)
       }
-    }
+    },
+    async setReferee(fixtureId: number, refereeName: string) {
+      try {
+        return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixture/${fixtureId}/referee_name/${refereeName}`)
+        .then(response => response.json())
+        .then( (updatedFixture: Fixture) => {
+          const fixtureToReplace = this.fixtures.find((fixture: Fixture) => updatedFixture.id === fixture.id);
+          if (fixtureToReplace) {
+            Object.assign(fixtureToReplace, updatedFixture);
+          }
+          this.runFilters();
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async setVenue(fixtureId: number, venue: string) {
+      try {
+        return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixture/${fixtureId}/venue/${venue}`)
+        .then(response => response.json())
+        .then( (updatedFixture: Fixture) => {
+          const fixtureToReplace = this.fixtures.find((fixture: Fixture) => updatedFixture.id === fixture.id);
+          if (fixtureToReplace) {
+            Object.assign(fixtureToReplace, updatedFixture);
+          }
+          this.runFilters();
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
   }
 });

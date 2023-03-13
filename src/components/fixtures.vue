@@ -23,6 +23,9 @@ import { useCompetitionStore } from '@/stores/competitionStore';
   const awayTeam = ref('');
   const currentFixtureId = ref(0);
 
+  const editReferee = ref(false);
+  const editVenue = ref(false);
+
   onMounted(() => {
     competitionStore.fetchCompetitions();
     fixtureStore.fetchFixtures();
@@ -160,12 +163,42 @@ import { useCompetitionStore } from '@/stores/competitionStore';
       showSetScore.value = false;
     })
   }
+
+  const toggleRefereeEdit = () => {
+    editReferee.value = !editReferee.value;
+  }
+
+  const handleRefereeEdit = ($event: Event, fixtureId: number) => {
+    const newRefereeName = ($event.target as HTMLInputElement).value;
+    editReferee.value = false;
+    fixtureStore.setReferee(fixtureId, newRefereeName).then( () => {
+      toast.success('Referee updated')
+    }).catch(error => {
+      toast.error('Unable to update the referee')
+      console.log('Error thrown while updating the referee', error);
+    })
+  }
+
+  const toggleVenueEdit = () => {
+    editVenue.value = !editVenue.value;
+  }
+
+  const handleVenueEdit = ($event: Event, fixtureId: number) => {
+    const newVenue = ($event.target as HTMLInputElement).value;
+    editVenue.value = false;
+    fixtureStore.setVenue(fixtureId, newVenue).then( () => {
+      toast.success('Venue updated')
+    }).catch(error => {
+      toast.error('Unable to update the venue')
+      console.log('Error thrown while updating the venue', error);
+    })
+  }
 </script>
 
 <template>
   <main-menu title="Fixtures" show-nav="true"></main-menu>
-  <div id="content" class="container">
-    
+  <div id="content">
+
     <div class="row justify-content-between fixture-actions">
       <div class="col">
         <select class="form-select" name="filterFixturesByCompetitionName" @change="setFixtureStoreCompetitionFilter($event)" v-model="competitionFilterName">
@@ -231,6 +264,13 @@ import { useCompetitionStore } from '@/stores/competitionStore';
         <template v-if="item.awayTeam.toLowerCase().includes('nemo rangers')"><span class="bold">{{ item.awayTeam }}</span></template>
         <template v-else>{{ item.awayTeam }}</template>
       </template>
+      <template #item-venue="item">
+        <span v-if="!editVenue" @dblclick="toggleVenueEdit()">
+          <span v-if="item.venue">{{ item.venue }}</span>
+          <span v-else><i class="bi-pencil"></i> </span>
+        </span>
+        <input type="text" class="form-control" v-if="editVenue" v-model="item.venue"  @keyup.enter="handleVenueEdit($event, item.id)" placeholder="Venue">
+      </template>
       <template #item-pitch="item">
         <select class="input-control" v-model="item.pitch" @change="handlePitchSelection($event, item.id)">
           <option disabled value="">Select pitch</option>
@@ -242,6 +282,13 @@ import { useCompetitionStore } from '@/stores/competitionStore';
           <option :value="5">Away</option>
           <option :value="6">Not applicable</option>
         </select>
+      </template>
+      <template #item-referee_name="item">
+        <span v-if="!editReferee" @dblclick="toggleRefereeEdit()">
+          <span v-if="item.referee_name">{{ item.referee_name }}</span>
+          <span v-else><i class="bi-pencil"></i> </span>
+        </span>
+        <input type="text" class="form-control" v-if="editReferee" v-model="item.referee_name"  @keyup.enter="handleRefereeEdit($event, item.id)" placeholder="Referee name">
       </template>
       <template #item-permission_sought="item">
         <input type="checkbox" v-model="item.permission_sought" @click="handlePermissionChange($event, item.id, 'permission_sought')">
