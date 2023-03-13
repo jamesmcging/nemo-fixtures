@@ -14,7 +14,7 @@ export const useFixtureStore = defineStore({
       toDateAsString: '',
       toDate: new Date(new Date().setDate(new Date().getDate() + 14)),
       competitionFilterName: 'all',
-      showSeniorGrade: false,
+      showSeniorGrade: true,
       showUnderageGrade: true
     }
   },

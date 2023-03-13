@@ -115,7 +115,10 @@ const handleLogin = ($event: Event) => {
             <tbody>
                 <tr v-for="fixture in currentFixtures">
                     <td>{{ epochToDateAndTime(fixture.date) }}</td>
-                    <td>{{ fixture.competition.name }}</td>
+                    <td>
+                        <b v-if="fixture.competition.seniorGrade" title="Adult match">A&nbsp;</b>
+                        {{ fixture.competition.name }}
+                    </td>
                     <td>{{ fixture.homeTeam }}</td>
                     <td>{{ fixture.awayTeam }}</td>
                     <td>{{ fixture.venue }}</td>

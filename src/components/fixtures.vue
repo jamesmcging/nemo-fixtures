@@ -29,8 +29,8 @@ import { useCompetitionStore } from '@/stores/competitionStore';
   onMounted(() => {
     competitionStore.fetchCompetitions();
     fixtureStore.fetchFixtures();
-    fixtureStore.setDate(new Date(), 'fromDate');
     const date = new Date();
+    fixtureStore.setDate(new Date(date.setDate(date.getDate() - 7)), 'fromDate');
     fixtureStore.setDate(new Date(date.setDate(date.getDate() + 14)), 'toDate');
   })
 
@@ -214,7 +214,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
       </div>
       <div class="col">
         <div class="btn-group">
-        <button :class="getGradeButtonClass('seniorGrade')" @click="fixtureStore.toggleShowGrade('seniorGrade')">Senior</button>
+        <button :class="getGradeButtonClass('seniorGrade')" @click="fixtureStore.toggleShowGrade('seniorGrade')">Adult</button>
         <button :class="getGradeButtonClass('underageGrade')" @click="fixtureStore.toggleShowGrade('underage')">Underage</button>
       </div>
       </div>
@@ -254,7 +254,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
         {{ getFormatedTime(item.time) }}
       </template>
       <template #item-competition.name="item">
-        <b v-show="item.competition.seniorGrade">Senior </b>{{ item.competition.name }}
+        <b v-show="item.competition.seniorGrade">Adult </b>{{ item.competition.name }}
       </template>
       <template #item-homeTeam="item">
         <template v-if="item.homeTeam.toLowerCase().includes('nemo rangers')"><span class="bold">{{ item.homeTeam }}</span></template>
