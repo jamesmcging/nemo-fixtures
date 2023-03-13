@@ -104,7 +104,6 @@ const headers: Header[] = [
       <div class="input-group">
         <input type="text" class="form-control" placeholder="Add competition by ID"
           @keyup.enter="addCompetitionById($event)">
-        <button class="btn btn-primary" @click="addCompetitionById($event)" type="button" id="button-addon2">Add</button>
       </div>
       <div class="btn-group">
         <button class="btn btn-outline-secondary" @click="toggleEventCreationWindow">Create Competition</button>
