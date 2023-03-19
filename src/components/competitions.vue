@@ -25,13 +25,16 @@ function fetchCompetitions(showToasts = true) {
   });
 };
 
-function updateCompetition(competitionId: number) {
-  toast(`Updating competition ${competitionId}`);
+function updateCompetition(competitionId: number, competitionName: string) {
+  toast(`Updating ${competitionName}`);
   competitionStore
     .updateCompetition(competitionId)
-    .then(response => {
-      if (response) {
-        toast.success(response);
+    .then(numberOfUpdatedFixtures => {
+      console.log(numberOfUpdatedFixtures);
+      if (numberOfUpdatedFixtures) {
+        toast.success(`Updated ${numberOfUpdatedFixtures} in ${competitionName}`);
+      } else {
+        toast.success(`No fixtures in ${competitionName} were updated`);
       }
       fetchCompetitions(false);
     })
@@ -61,7 +64,9 @@ function addCompetitionById($event: Event) {
 
 function updateAllCompetitions() {
   competitions.value.forEach((competition: Competition) => {
-    updateCompetition(Number(competition.id))
+    if (parseInt(competition.id) > 100) {
+      updateCompetition(Number(competition.id), competition.name)
+    }
   });
 }
 
@@ -129,7 +134,7 @@ const headers: Header[] = [
         <input type="checkbox" v-model="item.seniorGrade" @click="handleGradeChange($event, item.id)">
       </template>
       <template #item-createdAt="item">
-        <button class="btn btn-outline-secondary btn-sm" v-if="item.id > 1000" @click="updateCompetition(item.id)">Update</button>
+        <button class="btn btn-outline-secondary btn-sm" v-if="item.id > 1000" @click="updateCompetition(item.id, item.name)">Update</button>
       </template>
     </EasyDataTable>
   </div>

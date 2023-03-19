@@ -14,7 +14,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
   const fixtureStore = useFixtureStore();
   const competitionStore = useCompetitionStore();
   const { competitions } = storeToRefs(competitionStore);
-  const { currentFixtures: currentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade, competitionFilterName } = storeToRefs(fixtureStore);
+  const { getCurrentFixtures, competitionNames, toDateAsString, fromDateAsString, showSeniorGrade, showUnderageGrade, competitionFilterName } = storeToRefs(fixtureStore);
   
   const showSetScore = ref(false);
   const homeScore = ref('');
@@ -49,7 +49,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
   ];
 
   const getFormatedTime = (epoch: number) => {
-    const date = new Date(epoch * 1000);
+    const date = new Date(epoch);
     let hour = new Intl.DateTimeFormat('en', { hour: 'numeric', hour12: false }).format(date);
     let minutes = new Intl.DateTimeFormat('en', { minute: '2-digit' }).format(date);
     if (minutes === '0') minutes = '00'
@@ -59,16 +59,16 @@ import { useCompetitionStore } from '@/stores/competitionStore';
 
   const getExcel = () => {
     toast('Generating excel, this will appear in your downloads folder');
-    const data = currentFixtures.value.map((fixture: Fixture) => {
+    const data = getCurrentFixtures.value.map((fixture: Fixture) => {
       return {
         date: getFormatedDate(Number(fixture.date)),
-        time: new Date(Number(fixture.date)*1000).toLocaleTimeString(),
+        time: new Date(fixture.date).toLocaleTimeString(),
         competition: fixture.competition.name,
         homeTeam: fixture.homeTeam,
         awayTeam: fixture.awayTeam,
         venue: fixture.venue,
         pitch: fixture.pitch,
-        referee: fixture.referee_name,
+        referee_name: fixture.referee_name,
         permission_sought: fixture.permission_sought,
         score: getFormatedScore(fixture.homeScore, fixture.awayScore)
       }
@@ -85,7 +85,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
   }
 
   const getFormatedDate = (epoch: number) => {
-    const date = new Date(epoch * 1000);
+    const date = new Date(epoch);
     let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
     let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
     let day = new Intl.DateTimeFormat('en', { day: 'numeric' }).format(date);
@@ -129,15 +129,8 @@ import { useCompetitionStore } from '@/stores/competitionStore';
     fixtureStore.setPitch(fixtureId, pitch);
   }
 
-  const handleFixtureComment = ($event: Event, fixtureId: number) => {
-    const comment = ($event.target as HTMLInputElement).value;
-    fixtureStore.setComment(fixtureId, comment).then( () => {
-      toast.success('Updated commment on fixture');
-    });
-  }
-
   const handlePermissionChange = ($event: Event, fixtureId: number, permissionStage: string) => {
-    const permission = !!($event.target as HTMLInputElement).value;
+    const permission = ($event.target as HTMLInputElement).checked;
     fixtureStore.setPermission(fixtureId, permission, permissionStage).then( () => {
       toast.success(`Updated ${permissionStage} on fixture`);
     });
@@ -193,6 +186,21 @@ import { useCompetitionStore } from '@/stores/competitionStore';
       console.log('Error thrown while updating the venue', error);
     })
   }
+
+  const saveFixture = (event: Event, updatedFixture: Fixture) => {
+    event.preventDefault();
+    toast.info(`Saving fixture edits`);
+    fixtureStore.saveFixtureEdits(updatedFixture)
+      .then( arrUpdatedFields => {
+        toast.success(`Updated field(s): ${arrUpdatedFields?.join(', ')}`);
+    })
+    .catch(() => {
+      toast.error(`Unable to save edited fixture`);
+    });
+  }
+  const handleDateSelection = (selectedDate: Date, fixtureId: number) => {
+    fixtureStore.setCurrentFixtureDate(fixtureId, selectedDate);
+  }
 </script>
 
 <template>
@@ -244,14 +252,14 @@ import { useCompetitionStore } from '@/stores/competitionStore';
 
     <EasyDataTable
       :headers="headers"
-      :items="currentFixtures"
+      :items="getCurrentFixtures"
       alternating
     >
       <template #item-date="item">
         {{ getFormatedDate(item.date) }}
       </template>
       <template #item-time="item">
-        {{ getFormatedTime(item.time) }}
+        {{ getFormatedTime(item.date) }}
       </template>
       <template #item-competition.name="item">
         <b v-show="item.competition.seniorGrade">Adult </b>{{ item.competition.name }}
@@ -300,7 +308,82 @@ import { useCompetitionStore } from '@/stores/competitionStore';
         <span @click="handleScore(item)">{{ item.homeScore }} : {{ item.awayScore }}</span>
       </template>
       <template #expand="item">
-        <input type="text" class="form-control comment-input" placeholder="Comment on the fixture" @keyup.enter="handleFixtureComment($event, item.id)" :value="item.comment">
+
+        <form @submit="saveFixture($event, item)">
+          <h3>Edit Fixture</h3>
+          <div class="mb-3 row">
+            <div class="col">
+              <label for="fixture-homeTeam" class="form-label">Home Team</label>
+            <input type="text" class="form-control" id="fixture-homeTeam" placeholder="Home team" v-model="item.homeTeam" disabled>
+            </div>
+            <div class="col">
+              <label for="fixture-awayTeam" class="form-label">Away Team</label>
+            <input type="text" class="form-control" id="fixture-awayTeam" placeholder="Away team" v-model="item.awayTeam" disabled>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <label for="fixture-home-score" class="form-label">Home score*</label>
+              <input type="text" class="form-control" id="fixture-home-score" placeholder="Home score" v-model="item.homeScore">
+            </div>
+            <div class="col">
+              <label for="fixture-away-score" class="form-label">Away score*</label>
+              <input type="text" class="form-control" id="fixture-away-score" placeholder="Away score" v-model="item.awayScore">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="fixture-date" class="form-label">Date and time</label>
+            <VueDatePicker id="fixture-date" v-model="item.date" format="dd MMM yyyy HH:mm" @update:model-value="handleDateSelection($event, item.id)"></VueDatePicker>
+          </div>
+          <div class="mb-3">
+            <label for="fixture-venue" class="form-label">Venue*</label>
+            <input type="text" class="form-control" id="fixture-venue" placeholder="Where will the event take place?" v-model="item.venue">
+          </div>
+          <div class="mb-3">
+            <label for="fixture-pitch" class="form-label">Pitch</label>
+            <select class="form-select" v-model="item.pitch">
+                <option disabled value="">Select pitch</option>
+                <option :value="0">TBC</option>
+                <option :value="1">Pitch 1</option>
+                <option :value="2">Pitch 2</option>
+                <option :value="3">Pitch 3</option>
+                <option :value="4">Pitch 4</option>
+                <option :value="5">Away</option>
+                <option :value="6">Not applicable</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="fixture-referee" class="form-label">Referee*</label>
+            <input type="text" class="form-control" id="fixture-referee" placeholder="Who will referee the match" v-model="item.referee_name">
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="item.permission_sought" id="fixture-permission_sought">
+                <label class="form-check-label" for="fixture-permission_sought">
+                  Permission Sought
+                </label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="item.permission_obtained" id="fixture-permission_obtained">
+                <label class="form-check-label" for="fixture-permission_obtained">
+                  Permission Obtained
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="fixture-comment" class="form-label">Comment</label>
+            <textarea class="form-control" id="fixture-comment" rows="3" v-model="item.comment"></textarea>
+          </div>
+          <div class="mb-3">
+              <button class="btn btn-primary" type="submit" @click="saveFixture($event, item)">Save</button>
+          </div>
+          <p>* items marked with an asterix will be over-written whenever a competition is updated.</p>
+        </form>
+
       </template>
     </EasyDataTable>
   </div>

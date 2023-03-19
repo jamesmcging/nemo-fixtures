@@ -32,7 +32,10 @@ export const useCompetitionStore = defineStore({
         },
         async updateCompetition(competitionId: number) {
             return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/updateFixtures/${competitionId}`)
-                .then(response => response.text())
+                .then( response => response.json())
+                .then( data => {
+                    return data.length;
+                })
                 .catch(error => {
                     console.error(error);
                 })

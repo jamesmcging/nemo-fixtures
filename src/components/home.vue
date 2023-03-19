@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import mainMenu from "./mainMenu.vue";
 import { useToast } from "vue-toastification";
 import { useFixtureStore } from '@/stores/fixtureStore';
 import { useCompetitionStore } from '@/stores/competitionStore';
@@ -31,9 +30,15 @@ const setNewFixtureCompetitionId = ($event: Event) => {
 const handleSaveNewFixture = ($event: Event) => {
     $event.preventDefault();
     if (newFixtureCompetitionId.value && newFixtureHomeTeam.value && newFixtureAwayTeam.value) {
-        const jsEpoch = new Date(newFixtureDate.value).getTime();
+        const newFixture = {
+            competitionId: newFixtureCompetitionId.value, 
+            date: new Date(newFixtureDate.value).getTime(),
+            homeTeam: newFixtureHomeTeam.value, 
+            awayTeam: newFixtureAwayTeam.value, 
+            venue: newFixtureVenue.value
+        };
         fixtureStore
-            .setNewFixture(newFixtureCompetitionId.value, jsEpoch, newFixtureHomeTeam.value, newFixtureAwayTeam.value, newFixtureVenue.value)
+            .saveFixtureEdits(newFixture)
             .then(() => {
                 showCreateFixture.value = false;
                 toast.success('Created the new fixture');
@@ -48,8 +53,9 @@ const handleSaveNewFixture = ($event: Event) => {
     }
 }
 
-const epochToDateAndTime = (epoch: string) => {
-    return new Date(Number(epoch) * 1000).toString().slice(0, 21);
+const getFormatedDate = (epoch: number) => {
+    const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour12: false, hour: 'numeric', minute: 'numeric' })
+    return dateFormat.format(new Date(epoch));
 }
 
 const handleLogin = ($event: Event) => {
@@ -80,7 +86,7 @@ const handleLogin = ($event: Event) => {
                     </div>
                     <div class="form-group">
                         <label for="new-fixture-date-input" class="form-label">Which date will this happen?</label>
-                        <VueDatePicker id="new-fixture-date-input" v-model="newFixtureDate"></VueDatePicker>
+                        <VueDatePicker id="new-fixture-date-input" v-model="newFixtureDate" format="dd MMM yyyy @ HH:mm "></VueDatePicker>
                     </div>
                     <div class="form-group">
                         <label for="new-fixture-home-team-input" class="form-label">Home team</label>
@@ -114,7 +120,7 @@ const handleLogin = ($event: Event) => {
             </thead>
             <tbody>
                 <tr v-for="fixture in currentFixtures">
-                    <td>{{ epochToDateAndTime(fixture.date) }}</td>
+                    <td>{{ getFormatedDate(fixture.date) }}</td>
                     <td>
                         <b v-if="fixture.competition.seniorGrade" title="Adult match">A&nbsp;</b>
                         {{ fixture.competition.name }}

@@ -3,13 +3,12 @@
 </script>
 
 <template>
-  
-  <RouterLink to="/">
-    <div id="main-menu-top">
+  <div id="main-menu-top">
+    <RouterLink to="/">
       <img src="@/assets/nemo.png">
-      <h1>{{ props.title }}</h1>
-    </div>
-  </RouterLink>
+    </RouterLink>
+    <h1>{{ props.title }}</h1>
+  </div>
 
   <div id="main-menu-bottom" v-if="showNav">
       <RouterLink to="/fixtures">Fixtures</RouterLink> |

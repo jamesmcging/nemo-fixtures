@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import type Fixture from "@/types/fixture";
-
+interface EditFixtureResponse {
+  updatedFields: String[],
+  updatedFixture: Fixture,
+  updatedFixturesList: Fixture[]
+}
 
 export const useFixtureStore = defineStore({
   id: "fixtureStore",
@@ -22,7 +26,7 @@ export const useFixtureStore = defineStore({
     getFixtures(state): Fixture[] {
       return state.fixtures
     },
-    getNemoFixtures(state): Fixture[] {
+    getCurrentFixtures(state): Fixture[] {
       return state.currentFixtures
     },
     getCompetitionName(state) {
@@ -64,7 +68,7 @@ export const useFixtureStore = defineStore({
           this.runFilters();
         })
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     },
     filterFixturesByCompetitionName(fixtures: Fixture[]) {
@@ -74,20 +78,20 @@ export const useFixtureStore = defineStore({
       } else {
         response = fixtures.filter(fixture => fixture.competition.name === this.competitionFilterName);
       }
-      console.log(`Fixture count after filterByCompetitionName ${response.length}`);
+      // console.log(`Fixture count after filterByCompetitionName ${response.length}`);
       return response;
     },
     filterFixturesByNemo(fixtures: Fixture[]) {
       let response = fixtures.filter(fixture => {
         return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers') || fixture.competition.name.toLowerCase().includes('event'))
       })
-      console.log(`Fixture count after filterFixturesByNemo ${response.length}`);
+      // console.log(`Fixture count after filterFixturesByNemo ${response.length}`);
       return response;
     },
     filterFixturesByDate(fixtures: Fixture[]) {
-      const filteredFixtures = fixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime() > this.fromDate.getTime()));
-      let response = filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)*1000).getTime()) < this.toDate.getTime()); 
-      console.log(`Fixture count after filterFixturesByDate ${response.length}`);
+      const filteredFixtures = fixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)).getTime() > this.fromDate.getTime()));
+      let response = filteredFixtures.filter((fixture: Fixture) => (new Date(Number(fixture.date)).getTime()) < this.toDate.getTime()); 
+      // console.log(`Fixture count after filterFixturesByDate ${response.length}`);
       return response;
     },
     filterFixturesBySeniorGrade(fixtures: Fixture[]) {
@@ -104,7 +108,7 @@ export const useFixtureStore = defineStore({
       } else {
         response = fixtures;
       }
-      console.log(`Fixture count after filterFixturesBySeniorGrade ${response.length}`);
+      // console.log(`Fixture count after filterFixturesBySeniorGrade ${response.length}`);
       return response;
     },
     filterFixturesByUnderageGrade(fixtures: Fixture[]) {
@@ -121,7 +125,7 @@ export const useFixtureStore = defineStore({
       } else {
         response = fixtures;
       }
-      console.log(`Fixture count after filterFixturesByUnderageGrade ${response.length}`);
+      // console.log(`Fixture count after filterFixturesByUnderageGrade ${response.length}`);
       return response;
     },
     setCompetitionFilter(competitionName: string) {
@@ -137,6 +141,13 @@ export const useFixtureStore = defineStore({
         this.toDateAsString = date.toISOString().slice(0,10);
       }
       this.runFilters();
+    },
+    setCurrentFixtureDate(fixtureId: number, newDate: Date) {
+      for (const fixture of this.currentFixtures) {
+        if (fixture.id === fixtureId) {
+          fixture.date = newDate.getTime()
+        }
+      }
     },
     toggleShowGrade(grade: string) {
       if (grade === 'seniorGrade') {
@@ -215,27 +226,22 @@ export const useFixtureStore = defineStore({
         console.log(error)
       }
     },
-    async setNewFixture(competitionId: number, jsEpoch: number, homeTeam: string, awayTeam: string, venue: string): Promise<void> {
+    async saveFixtureEdits(fixture: Partial<Fixture>): Promise<String[] | void> {
       try {
-        const newFixture = {
-          homeTeam: homeTeam,
-          awayTeam: awayTeam,
-          venue: venue,
-          fixtureDate: jsEpoch ? Math.round(jsEpoch / 1000) : Math.round(new Date().getTime() / 1000),
-          competitionId: competitionId
-        }
-        return fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures`, {
+        const response = await fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/update`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(newFixture)
-        })
-          .then(response => response.json())
-          .then( (updatedFixturesList: Fixture[]) => {
-            this.fixtures = updatedFixturesList;
-            this.runFilters();
-          })
+          body: JSON.stringify(fixture)
+        });
+
+        const data:EditFixtureResponse = await response.json();
+
+        this.fixtures = data.updatedFixturesList;
+        this.runFilters();
+        return data.updatedFields;
+        
       } catch (error) {
         console.log(error)
       }
@@ -269,6 +275,6 @@ export const useFixtureStore = defineStore({
       } catch (error) {
         console.log(error)
       }
-    },
+    }
   }
 });

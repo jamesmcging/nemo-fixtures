@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: home,
+      component: () => import("../components/home.vue"),
     },
     {
       path: "/fixtures",
