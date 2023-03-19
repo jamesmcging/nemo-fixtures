@@ -57,6 +57,20 @@ import { useCompetitionStore } from '@/stores/competitionStore';
     return `${hour}:${minutes}`;
   }
 
+  const getPitch = (pitchAsNumber: string) => {
+    switch (pitchAsNumber) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+            return `pitch ${pitchAsNumber}`
+        case '5':
+            return 'away'
+        case '6':
+        default:
+            return 'n/a'
+    }
+}
   const getExcel = () => {
     toast('Generating excel, this will appear in your downloads folder');
     const data = getCurrentFixtures.value.map((fixture: Fixture) => {
@@ -67,7 +81,7 @@ import { useCompetitionStore } from '@/stores/competitionStore';
         homeTeam: fixture.homeTeam,
         awayTeam: fixture.awayTeam,
         venue: fixture.venue,
-        pitch: fixture.pitch,
+        pitch: getPitch(fixture.pitch),
         referee_name: fixture.referee_name,
         permission_sought: fixture.permission_sought,
         score: getFormatedScore(fixture.homeScore, fixture.awayScore)
