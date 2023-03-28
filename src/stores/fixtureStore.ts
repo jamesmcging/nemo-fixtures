@@ -83,7 +83,7 @@ export const useFixtureStore = defineStore({
     },
     filterFixturesByNemo(fixtures: Fixture[]) {
       let response = fixtures.filter(fixture => {
-        return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers') || fixture.competition.name.toLowerCase().includes('event'))
+        return (fixture.homeTeam.toLowerCase().includes('nemo rangers') || fixture.awayTeam.toLowerCase().includes('nemo rangers') || fixture.competition?.name.toLowerCase().includes('event'))
       })
       // console.log(`Fixture count after filterFixturesByNemo ${response.length}`);
       return response;
