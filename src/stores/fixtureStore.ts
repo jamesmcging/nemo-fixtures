@@ -228,7 +228,7 @@ export const useFixtureStore = defineStore({
     },
     async saveFixtureEdits(fixture: Partial<Fixture>): Promise<String[] | void> {
       try {
-        const response = await fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures/update`, {
+        const response = await fetch(`${import.meta.env.VITE_FIXTURE_SERVICE_URL}/fixtures`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
